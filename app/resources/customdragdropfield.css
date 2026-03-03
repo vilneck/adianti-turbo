@@ -1,0 +1,102 @@
+.custom-dragdrop-field {
+    max-width: 100%;
+}
+
+.custom-dragdrop-field-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.custom-dragdrop-field-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #ffffff;
+    border: 1px solid #d9dee7;
+    border-radius: 10px;
+    cursor: grab;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.custom-dragdrop-field-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.custom-dragdrop-field-handle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    color: #6b7280;
+    cursor: grab;
+    user-select: none;
+}
+
+.custom-dragdrop-field-handle i {
+    font-size: 14px;
+}
+
+.custom-dragdrop-field-item:active {
+    cursor: grabbing;
+}
+
+.custom-dragdrop-field-name {
+    color: #1f2937;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.custom-dragdrop-field-toggle {
+    position: relative;
+    width: 46px;
+    height: 24px;
+    border: 0;
+    border-radius: 999px;
+    background: #cbd5e1;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.custom-dragdrop-field-toggle.on {
+    background: #16a34a;
+}
+
+.custom-dragdrop-field-toggle-knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #111827;
+    transition: left 0.2s ease;
+}
+
+.custom-dragdrop-field-toggle.on .custom-dragdrop-field-toggle-knob {
+    left: 25px;
+}
+
+.custom-dragdrop-field-item.dragging {
+    opacity: 0.4;
+}
+
+.custom-dragdrop-field.disabled .custom-dragdrop-field-item {
+    cursor: default;
+    opacity: 0.75;
+}
+
+.custom-dragdrop-field.disabled .custom-dragdrop-field-handle {
+    cursor: not-allowed;
+}
+
+.custom-dragdrop-field.disabled .custom-dragdrop-field-toggle {
+    cursor: not-allowed;
+}
