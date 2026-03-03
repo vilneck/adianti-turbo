@@ -13,6 +13,7 @@ class DragDropView extends TPage
 
         $dragDropField = new CustomDragDropField('columns_state');
         $dragDropField->setSize('420px');
+        $dragDropField->setActiveItemBackgroundColor('#dff0e0');
         $dragDropField->addItems([
             ['id' => 1, 'name' => 'ID da Ordem de Servico', 'visible' => true],
             ['id' => 2, 'name' => 'Status', 'visible' => true],

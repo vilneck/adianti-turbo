@@ -14,6 +14,8 @@ class CustomDragDropField extends TField implements AdiantiWidgetInterface
     protected $height;
     protected $listId;
     protected $hiddenId;
+    protected $activeItemBackgroundColor;
+    protected $inactiveItemBackgroundColor;
 
     public function __construct($name)
     {
@@ -25,6 +27,8 @@ class CustomDragDropField extends TField implements AdiantiWidgetInterface
         $this->items = [];
         $this->width = '100%';
         $this->height = null;
+        $this->activeItemBackgroundColor = null;
+        $this->inactiveItemBackgroundColor = null;
 
         $this->tag = new TElement('div');
         $this->tag->{'class'} = 'custom-dragdrop-field';
@@ -50,6 +54,16 @@ class CustomDragDropField extends TField implements AdiantiWidgetInterface
     public function getItems()
     {
         return $this->items;
+    }
+
+    public function setActiveItemBackgroundColor($color)
+    {
+        $this->activeItemBackgroundColor = $color;
+    }
+
+    public function setInactiveItemBackgroundColor($color)
+    {
+        $this->inactiveItemBackgroundColor = $color;
     }
 
     public function setValue($value)
@@ -115,6 +129,8 @@ class CustomDragDropField extends TField implements AdiantiWidgetInterface
         $wrapper->{'class'} = 'custom-dragdrop-field';
         $wrapper->{'widget'} = 'customdragdropfield';
         $wrapper->{'data-name'} = $this->name;
+        $wrapper->{'data-active-item-background-color'} = $this->activeItemBackgroundColor;
+        $wrapper->{'data-inactive-item-background-color'} = $this->inactiveItemBackgroundColor;
 
         if (!parent::getEditable())
         {
@@ -158,6 +174,9 @@ class CustomDragDropField extends TField implements AdiantiWidgetInterface
             'hidden_id' => $this->hiddenId,
             'items' => $value,
             'editable' => parent::getEditable(),
+            'active_item_background_color' => $this->activeItemBackgroundColor,
+            'inactive_item_background_color' => $this->inactiveItemBackgroundColor,
+            'sortable_url' => 'https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js',
         ];
 
         $configJson = json_encode($config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

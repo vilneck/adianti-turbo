@@ -49,6 +49,19 @@
         toggle.setAttribute('aria-pressed', item.visible ? 'true' : 'false');
     }
 
+    function updateItemColors(row, item, config) {
+        var activeColor = config.active_item_background_color;
+        var inactiveColor = config.inactive_item_background_color;
+
+        row.style.backgroundColor = '';
+
+        if (item.visible && activeColor) {
+            row.style.backgroundColor = activeColor;
+        } else if (!item.visible && inactiveColor) {
+            row.style.backgroundColor = inactiveColor;
+        }
+    }
+
     function dispatchChange(root, state, reason) {
         if (typeof CustomEvent === 'function') {
             root.dispatchEvent(new CustomEvent('customdragdropfield.change', {
@@ -58,6 +71,59 @@
                 }
             }));
         }
+    }
+
+    function createSortable(root, list, hidden, state, config) {
+        if (root.customDragDropSortable && typeof root.customDragDropSortable.destroy === 'function') {
+            root.customDragDropSortable.destroy();
+        }
+
+        root.customDragDropSortable = Sortable.create(list, {
+            animation: 150,
+            ghostClass: 'dragging',
+            filter: '.custom-dragdrop-field-toggle, .custom-dragdrop-field-toggle *',
+            preventOnFilter: false,
+            onEnd: function () {
+                var order = Array.prototype.slice.call(
+                    list.querySelectorAll('.custom-dragdrop-field-item')
+                ).map(function (element) {
+                    return String(element.dataset.id);
+                });
+
+                state = order.map(function (id) {
+                    return state.find(function (item) {
+                        return String(item.id) === id;
+                    });
+                }).filter(Boolean);
+
+                syncState(root, hidden, state);
+                dispatchChange(root, state, 'sort');
+            }
+        });
+    }
+
+    function ensureSortable(config, callback) {
+        if (typeof Sortable !== 'undefined') {
+            callback();
+            return;
+        }
+
+        if (window.jQuery && typeof window.jQuery.getScript === 'function') {
+            window.jQuery.getScript(config.sortable_url)
+                .done(callback)
+                .fail(function () {
+                    console.error('Nao foi possivel carregar Sortable.js para CustomDragDropField');
+                });
+            return;
+        }
+
+        var script = document.createElement('script');
+        script.src = config.sortable_url;
+        script.onload = callback;
+        script.onerror = function () {
+            console.error('Nao foi possivel carregar Sortable.js para CustomDragDropField');
+        };
+        document.head.appendChild(script);
     }
 
     window.customdragdropfield_start = function (config) {
@@ -101,6 +167,7 @@
             toggle.appendChild(knob);
 
             updateToggle(toggle, item);
+            updateItemColors(row, item, config);
 
             if (!editable) {
                 toggle.disabled = true;
@@ -110,6 +177,7 @@
                     event.stopPropagation();
                     item.visible = !item.visible;
                     updateToggle(toggle, item);
+                    updateItemColors(row, item, config);
                     syncState(root, hidden, state);
                     dispatchChange(root, state, 'toggle');
                 });
@@ -128,35 +196,8 @@
             return;
         }
 
-        if (root.customDragDropSortable && typeof root.customDragDropSortable.destroy === 'function') {
-            root.customDragDropSortable.destroy();
-        }
-
-        if (typeof Sortable === 'undefined') {
-            console.error('Sortable.js nao foi carregado para CustomDragDropField');
-            return;
-        }
-
-        root.customDragDropSortable = Sortable.create(list, {
-            animation: 150,
-            ghostClass: 'dragging',
-            handle: '.custom-dragdrop-field-handle',
-            onEnd: function () {
-                var order = Array.prototype.slice.call(
-                    list.querySelectorAll('.custom-dragdrop-field-item')
-                ).map(function (element) {
-                    return String(element.dataset.id);
-                });
-
-                state = order.map(function (id) {
-                    return state.find(function (item) {
-                        return String(item.id) === id;
-                    });
-                }).filter(Boolean);
-
-                syncState(root, hidden, state);
-                dispatchChange(root, state, 'sort');
-            }
+        ensureSortable(config, function () {
+            createSortable(root, list, hidden, state, config);
         });
     };
 }());
