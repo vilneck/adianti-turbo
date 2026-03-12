@@ -16,6 +16,10 @@ class CustomDragDropField extends TField implements AdiantiWidgetInterface
     protected $hiddenId;
     protected $activeItemBackgroundColor;
     protected $inactiveItemBackgroundColor;
+    protected $showToggleAll;
+    protected $toggleAllLabel;
+    protected $toggleAllActiveLabel;
+    protected $toggleAllInactiveLabel;
 
     public function __construct($name)
     {
@@ -29,6 +33,10 @@ class CustomDragDropField extends TField implements AdiantiWidgetInterface
         $this->height = null;
         $this->activeItemBackgroundColor = null;
         $this->inactiveItemBackgroundColor = null;
+        $this->showToggleAll = false;
+        $this->toggleAllLabel = 'Visibilidade';
+        $this->toggleAllActiveLabel = 'Marcar todos';
+        $this->toggleAllInactiveLabel = 'Desmarcar todos';
 
         $this->tag = new TElement('div');
         $this->tag->{'class'} = 'custom-dragdrop-field';
@@ -64,6 +72,19 @@ class CustomDragDropField extends TField implements AdiantiWidgetInterface
     public function setInactiveItemBackgroundColor($color)
     {
         $this->inactiveItemBackgroundColor = $color;
+    }
+
+    public function enableToggleAll($label = null, $activeLabel = null, $inactiveLabel = null)
+    {
+        $this->showToggleAll = true;
+        $this->toggleAllLabel = $label ?: 'Visibilidade';
+        $this->toggleAllActiveLabel = $activeLabel ?: 'Marcar todos';
+        $this->toggleAllInactiveLabel = $inactiveLabel ?: 'Desmarcar todos';
+    }
+
+    public function disableToggleAll()
+    {
+        $this->showToggleAll = false;
     }
 
     public function setValue($value)
@@ -158,6 +179,31 @@ class CustomDragDropField extends TField implements AdiantiWidgetInterface
         $list->{'id'} = $this->listId;
         $list->{'class'} = 'custom-dragdrop-field-list';
 
+        if ($this->showToggleAll)
+        {
+            $toolbar = new TElement('div');
+            $toolbar->{'class'} = 'custom-dragdrop-field-toolbar';
+
+            $toolbarLabel = new TElement('span');
+            $toolbarLabel->{'class'} = 'custom-dragdrop-field-toolbar-label';
+            $toolbarLabel->add($this->toggleAllLabel);
+
+            $toolbarButton = new TElement('button');
+            $toolbarButton->{'id'} = $this->id . '_toggle_all';
+            $toolbarButton->{'type'} = 'button';
+            $toolbarButton->{'class'} = 'btn btn-default btn-sm custom-dragdrop-field-toggle-all';
+            $toolbarButton->add($this->toggleAllActiveLabel);
+
+            if (!parent::getEditable())
+            {
+                $toolbarButton->{'disabled'} = 'disabled';
+            }
+
+            $toolbar->add($toolbarLabel);
+            $toolbar->add($toolbarButton);
+            $wrapper->add($toolbar);
+        }
+
         $hidden = new TElement('input');
         $hidden->{'id'} = $this->hiddenId;
         $hidden->{'type'} = 'hidden';
@@ -177,10 +223,45 @@ class CustomDragDropField extends TField implements AdiantiWidgetInterface
             'active_item_background_color' => $this->activeItemBackgroundColor,
             'inactive_item_background_color' => $this->inactiveItemBackgroundColor,
             'sortable_url' => 'https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js',
+            'component_js_url' => 'app/resources/customdragdropfield.js',
+            'show_toggle_all' => $this->showToggleAll,
+            'toggle_all_button_id' => $this->id . '_toggle_all',
+            'toggle_all_active_label' => $this->toggleAllActiveLabel,
+            'toggle_all_inactive_label' => $this->toggleAllInactiveLabel,
         ];
 
         $configJson = json_encode($config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        TScript::create("customdragdropfield_start({$configJson});");
+        TScript::create("
+            (function(config) {
+                function startComponent() {
+                    if (typeof customdragdropfield_start === 'function') {
+                        customdragdropfield_start(config);
+                    }
+                }
+
+                if (typeof customdragdropfield_start === 'function') {
+                    startComponent();
+                    return;
+                }
+
+                if (window.jQuery && typeof window.jQuery.getScript === 'function') {
+                    window.jQuery.getScript(config.component_js_url)
+                        .done(startComponent)
+                        .fail(function() {
+                            console.error('Nao foi possivel carregar customdragdropfield.js');
+                        });
+                    return;
+                }
+
+                var script = document.createElement('script');
+                script.src = config.component_js_url;
+                script.onload = startComponent;
+                script.onerror = function() {
+                    console.error('Nao foi possivel carregar customdragdropfield.js');
+                };
+                document.head.appendChild(script);
+            })({$configJson});
+        ");
     }
 
     protected function normalizeItems($items)

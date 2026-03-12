@@ -73,6 +73,22 @@
         }
     }
 
+    function areAllVisible(state) {
+        return state.length > 0 && state.every(function (item) {
+            return !!item.visible;
+        });
+    }
+
+    function updateToggleAllButton(button, state, config) {
+        if (!button) {
+            return;
+        }
+
+        button.textContent = areAllVisible(state)
+            ? config.toggle_all_inactive_label
+            : config.toggle_all_active_label;
+    }
+
     function createSortable(root, list, hidden, state, config) {
         if (root.customDragDropSortable && typeof root.customDragDropSortable.destroy === 'function') {
             root.customDragDropSortable.destroy();
@@ -130,6 +146,7 @@
         var root = document.getElementById(config.id);
         var list = document.getElementById(config.list_id);
         var hidden = document.getElementById(config.hidden_id);
+        var toggleAllButton = config.show_toggle_all ? document.getElementById(config.toggle_all_button_id) : null;
 
         if (!root || !list || !hidden) {
             return;
@@ -179,6 +196,7 @@
                     updateToggle(toggle, item);
                     updateItemColors(row, item, config);
                     syncState(root, hidden, state);
+                    updateToggleAllButton(toggleAllButton, state, config);
                     dispatchChange(root, state, 'toggle');
                 });
             }
@@ -191,9 +209,37 @@
         });
 
         syncState(root, hidden, state);
+        updateToggleAllButton(toggleAllButton, state, config);
 
         if (!editable) {
             return;
+        }
+
+        if (toggleAllButton) {
+            toggleAllButton.onclick = function (event) {
+                event.preventDefault();
+
+                var nextValue = !areAllVisible(state);
+
+                state.forEach(function (item, index) {
+                    item.visible = nextValue;
+
+                    var row = list.querySelectorAll('.custom-dragdrop-field-item')[index];
+                    var toggle = row ? row.querySelector('.custom-dragdrop-field-toggle') : null;
+
+                    if (toggle) {
+                        updateToggle(toggle, item);
+                    }
+
+                    if (row) {
+                        updateItemColors(row, item, config);
+                    }
+                });
+
+                syncState(root, hidden, state);
+                updateToggleAllButton(toggleAllButton, state, config);
+                dispatchChange(root, state, nextValue ? 'toggle_all_on' : 'toggle_all_off');
+            };
         }
 
         ensureSortable(config, function () {

@@ -2,6 +2,20 @@
     max-width: 100%;
 }
 
+.custom-dragdrop-field-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.custom-dragdrop-field-toolbar-label {
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 600;
+}
+
 .custom-dragdrop-field-list {
     display: flex;
     flex-direction: column;

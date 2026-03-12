@@ -1,10 +1,10 @@
 <?php
 return [
-    'host'  =>  "",
+    'host'  =>  "localhost",
     'port'  =>  "",
-    'name'  =>  "",
-    'user'  =>  "",
-    'pass'  =>  "",
-    'type'  =>  "sqlite",
+    'name'  =>  "adianti_turbo",
+    'user'  =>  "root",
+    'pass'  =>  "root",
+    'type'  =>  "mysql",
     'prep'  =>  "1"
 ];
